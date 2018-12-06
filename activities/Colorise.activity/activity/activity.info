@@ -1,0 +1,6 @@
+[Activity]
+name = Colorise
+activity_version = 1
+bundle_id = org.sugarlabs.Colorise
+exec = sugar-activity-web
+icon = activity-icon

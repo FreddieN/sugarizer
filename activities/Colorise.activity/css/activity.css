@@ -1,0 +1,36 @@
+body {
+	margin: 0px;
+}
+
+#main-toolbar #activity-button {
+  background-image: url(../activity/activity-icon.svg);
+}
+
+.get-section {
+	text-align: center; 
+	padding: 8px;
+}
+
+.btn-info {
+	margin: 8px;
+}
+
+.display-section {
+	text-align: center;
+	padding: 8px;
+}
+
+.col-sm {
+	border: 2px groove black;
+	margin: 1px;
+	padding-top: 3%;
+	padding-bottom: 3%;
+}
+
+.jumbotron {
+	background-image: url("../icons/rainbow-bg.png");
+	background-repeat: no-repeat;
+	background-size: cover;
+	color: #ffffff;
+	text-align: center
+}
