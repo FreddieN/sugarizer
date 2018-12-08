@@ -174,6 +174,20 @@ define(["sugar-web/activity/activity", "sugar-web/env", "webL10n", "sugar-web/gr
 		document.getElementById("modal-text").innerHTML= (cards[learning]["question"]);
 		}
 		document.getElementById("flip").onclick = function() {
+			flip();
+		}
+		document.body.onkeyup = function(e){
+			if(e.keyCode == 32){
+				flip();
+			}
+			if(e.keyCode == 39){
+				nextcard();
+			}
+			if(e.keyCode == 37){
+				prevcard();
+			}
+		}
+		var flip = function() {
 			switch(face) {
 				case 0:
 					document.getElementById("modal-text").innerHTML= (cards[learning]["answer"]);
@@ -185,7 +199,7 @@ define(["sugar-web/activity/activity", "sugar-web/env", "webL10n", "sugar-web/gr
 					break;
 			}
 		}
-		document.getElementById("next").onclick = function() {
+		var nextcard = function() {
 			if(learning+1 < cards.length) {
 				learning += 1;
 				document.getElementById("modal-text").innerHTML= (cards[learning]["question"]);
@@ -194,8 +208,7 @@ define(["sugar-web/activity/activity", "sugar-web/env", "webL10n", "sugar-web/gr
 				document.getElementById("modal-text").innerHTML= (cards[learning]["question"]);
 			}
 		}
-		document.getElementById("prev").onclick = function() {
-
+		var prevcard = function() {
 			if(learning-1 > 0) {
 				learning -= 1;
 				document.getElementById("modal-text").innerHTML= (cards[learning]["question"]);
@@ -203,6 +216,13 @@ define(["sugar-web/activity/activity", "sugar-web/env", "webL10n", "sugar-web/gr
 				learning = cards.length-1;
 				document.getElementById("modal-text").innerHTML= (cards[learning]["question"]);
 			}
+		}
+
+		document.getElementById("next").onclick = function() {
+			nextcard();
+		}
+		document.getElementById("prev").onclick = function() {
+			prevcard();
 		}
 		// When the user clicks on <span> (x), close the modal
 		span.onclick = function() {
