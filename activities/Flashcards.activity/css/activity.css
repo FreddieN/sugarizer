@@ -1,0 +1,142 @@
+#main-toolbar #activity-button {
+  background-image: url(../activity/activity-icon.svg);
+}
+.container {
+  margin-left: 5vw;
+  margin-top: 5vh;
+}
+#set-name {
+  width: 90vw;
+  height: 5vh;
+  font-size: 4vh;
+}
+.card {
+  margin-top: 2vh;
+  background-color: #fff;
+  width: 90vw;
+  padding: 4px;
+  -webkit-box-shadow: 0 3px 0 #d7e4ed;
+          box-shadow: 0 3px 0 #d7e4ed;
+}
+.card-content {
+  display: inline-block;
+  width: 44vw;
+  height: 30vh;
+  margin-left: 0;
+  margin-right: 0;
+  background-attachment: local;
+    background-image:
+        linear-gradient(to right, white 10px, transparent 10px),
+        linear-gradient(to left, white 10px, transparent 10px),
+        repeating-linear-gradient(white, white 30px, #ccc 30px, #ccc 31px, white 31px);
+    line-height: 31px;
+    font-size: 4vh;
+}
+@media (max-width: 990px) {
+  .card-content {
+  width: 99%;
+  }
+}
+.card-header {
+  padding: 2px 16px;
+  background-color: #5cb85c;
+  color: white;
+}
+.close {
+  color: white;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+#learn-button {
+  background-color: #005A9C;
+  color: white;
+  display: block;
+  text-align: center;
+  margin-top: 2vh;
+  width: 90vw;
+  padding: 2vh 0;
+  font-size: 4vh;
+}
+#learn-button:hover{
+  background-color: rgb(99, 146, 180);
+  cursor: pointer;
+}
+#add-card {
+  background-color: #5cb85c;
+  color: white;
+  display: block;
+  text-align: center;
+  margin-top: 2vh;
+  width: 90vw;
+  padding: 0.2vh 0;
+  font-size: 4vh;
+  margin-bottom: 10vh;
+}
+#add-card:hover {
+  background-color: #309c30;
+  cursor: pointer;
+}
+#cards {
+  background: #e9f0f5;
+  width: 90.4vw;
+}
+/* The Modal (background) */
+.modal {
+  display: none;
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(26, 133, 175); /* Fallback color */
+  
+}
+
+/* Modal Content/Box */
+.modal-content {
+  background-color: #fefefe;
+  margin: 10% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+  height: 50%;
+    font-size: 4vh;
+}
+.modal-content .close {
+  color: #ccc;
+}
+.previous {
+  background-color: #f1f1f1;
+  color: black;
+  text-decoration: none;
+    display: inline-block;
+    padding: 8px 16px;
+}
+
+.next {
+  background-color: #4CAF50;
+  color: white;
+  text-decoration: none;
+    display: inline-block;
+    padding: 8px 16px;
+}
+.flip {
+  background-color: rgb(26, 133, 175);
+  color: white;
+  text-decoration: none;
+    display: inline-block;
+    padding: 8px 16px;
+}
+.nav-buttons {
+  text-align: center;
+}
