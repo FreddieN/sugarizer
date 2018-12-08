@@ -1,4 +1,4 @@
-define(["sugar-web/activity/activity", "sugar-web/env", "webL10n"], function (activity, env, webL10n) { 
+define(["sugar-web/activity/activity", "sugar-web/env", "webL10n", "sugar-web/graphics/presencepalette"], function (activity, env, webL10n, presencepalette) { 
 
 	// Manipulate the DOM only when it is ready.
 	require(['domReady!'], function (doc) {
@@ -14,28 +14,42 @@ define(["sugar-web/activity/activity", "sugar-web/env", "webL10n"], function (ac
 		var createdby = "";
 		var learning = 0;
 		var face = 0;
+		var init = 1;
+		var isHost = false;
 
 		env.getEnvironment(function(err, environment) {
 		currentenv = environment;
 		username = currentenv.user.name;
-
+		// Shared instances
+		if (environment.sharedId) {
+			presence = activity.getPresenceObject(function(error, network) {
+				network.onDataReceived(onNetworkDataReceived);
+				if(init == 1) {
+					presence.sendMessage(presence.getSharedInfo().id, {
+						user: presence.getUserInfo(),
+						content: {
+							"action":"init"
+						}
+					});
+					init = 0;
+				}
+			});
+			
+		}
 		// Set current language to Sugarizer
 		var defaultLanguage = (typeof chrome != 'undefined' && chrome.app && chrome.app.runtime) ? chrome.i18n.getUILanguage() : navigator.language;
 		var language = environment.user ? environment.user.language : defaultLanguage;
 		webL10n.language.code = language;
-
+		
 		// Load from datatore
 		if (!currentenv.objectId) {
-			console.log("New instance");
 			createFlashcard();
 		} else {
-			console.log("Existing instance");
 			activity.getDatastoreObject().loadAsText(function(error, metadata, data) {
 				if (error==null && data!=null) {
 					context_local = JSON.parse(data);
 					cards = context_local["cards"];
 					setname = context_local["setname"];
-					console.log(context_local);
 					document.getElementById("set-name").value = setname;
 					refreshCards();
 				}
@@ -45,28 +59,37 @@ define(["sugar-web/activity/activity", "sugar-web/env", "webL10n"], function (ac
 		
 		window.addEventListener("localized", function() {
 			document.getElementById("learn-button").innerHTML = (webL10n.get("LearnSet"));
+			document.getElementById("flip").innerHTML = webL10n.get("Flip");
 			createdby = webL10n.get("CreatedBy");
 			refreshCards();
 		});
 
 		document.getElementById("set-name").addEventListener("blur", function () {
 			setname = document.getElementById("set-name").value;
-			console.log(setname);
-		});
+					});
 
 		document.getElementById("add-card").addEventListener("click", createFlashcard);
 
 		function createFlashcard() {
-			console.log(username);
 			cards.push({
 				"owner": username,
 				"answer": "",
 				"question": ""
 			});
 			refreshCards();
+			if (presence) {
+				presence.sendMessage(presence.getSharedInfo().id, {
+					user: presence.getUserInfo(),
+					content: {
+						"action":"update",
+						"cards":cards,
+						"setname":setname
+					}
+				});
+			}
 		}
 		function destroyFlashcard(n) {
-			console.log(cards);
+
 			newcards = []
 			for (index = 0; index < cards.length; ++index) {
 				if(index != n) {
@@ -75,14 +98,24 @@ define(["sugar-web/activity/activity", "sugar-web/env", "webL10n"], function (ac
 			};
 			cards = newcards;
 			refreshCards();
+			if (presence) {
+				presence.sendMessage(presence.getSharedInfo().id, {
+					user: presence.getUserInfo(),
+					content: {
+						"action":"update",
+						"setname":setname,
+						"cards":cards
+					}
+				});
+			}
 		}
 		function refreshCards() {
 			mhtml = "";
 			for (index = 0; index < cards.length; ++index) {
-				console.log("s"+cards[index]["answer"]);
-				mhtml += '<div class="card"><div class="card-header"><span id="destroy-'+index+'" class="close">&times;</span><h2>#'+(index+1)+" "+createdby+" "+username+'</h2></div><textarea id="question-'+index+'" placeholder="Question" class="card-content">'+cards[index]["question"]+'</textarea><textarea id="answer-'+index+'" placeholder="Answer" class="card-content">'+cards[index]["answer"]+'</textarea></div>'
+
+				mhtml += '<div class="card"><div class="card-header"><span id="destroy-'+index+'" class="close">&times;</span><h2>#'+(index+1)+" "+createdby+" "+cards[index]["owner"]+'</h2></div><textarea id="question-'+index+'" placeholder="Question" class="card-content">'+cards[index]["question"]+'</textarea><textarea id="answer-'+index+'" placeholder="Answer" class="card-content">'+cards[index]["answer"]+'</textarea></div>'
 			};
-			console.log(cards);
+
 			document.getElementById("cards").innerHTML = mhtml;
 			for (index = 0; index < cards.length; ++index) {
 				document.getElementById("destroy-"+index).addEventListener('click', function(e) {
@@ -95,11 +128,31 @@ define(["sugar-web/activity/activity", "sugar-web/env", "webL10n"], function (ac
 					e = e || window.event;
 					var target = e.target || e.srcElement;
 					cards[target.id.split("-")[1]]["answer"] = e.target.value;
+					if (presence) {
+						presence.sendMessage(presence.getSharedInfo().id, {
+							user: presence.getUserInfo(),
+							content: {
+								"action":"update",
+								"setname":setname,
+								"cards":cards
+							}
+						});
+					}
 				});
 				document.getElementById("question-"+index).addEventListener('blur', function (e) {
 					e = e || window.event;
 					var target = e.target || e.srcElement;
 					cards[target.id.split("-")[1]]["question"] = e.target.value;
+					if (presence) {
+						presence.sendMessage(presence.getSharedInfo().id, {
+							user: presence.getUserInfo(),
+							content: {
+								"action":"update",
+								"setname":setname,
+								"cards":cards
+							}
+						});
+					}
 				});
 			};
 		}
@@ -115,6 +168,8 @@ define(["sugar-web/activity/activity", "sugar-web/env", "webL10n"], function (ac
 
 		// When the user clicks on the button, open the modal 
 		btn.onclick = function() {
+		learning = 0;
+		face = 0;
 		modal.style.display = "block";
 		document.getElementById("modal-text").innerHTML= (cards[learning]["question"]);
 		}
@@ -140,7 +195,7 @@ define(["sugar-web/activity/activity", "sugar-web/env", "webL10n"], function (ac
 			}
 		}
 		document.getElementById("prev").onclick = function() {
-			console.log(learning-1);
+
 			if(learning-1 > 0) {
 				learning -= 1;
 				document.getElementById("modal-text").innerHTML= (cards[learning]["question"]);
@@ -163,7 +218,7 @@ define(["sugar-web/activity/activity", "sugar-web/env", "webL10n"], function (ac
 
 		// Save in Journal on Stop
         document.getElementById("stop-button").addEventListener('click', function (event) {
-			console.log("writing...");
+
 			context_local = {
 				"cards": cards,
 				"setname": setname
@@ -172,12 +227,69 @@ define(["sugar-web/activity/activity", "sugar-web/env", "webL10n"], function (ac
             activity.getDatastoreObject().setDataAsText(jsonData);
             activity.getDatastoreObject().save(function (error) {
                 if (error === null) {
-                    console.log("write done.");
-                } else {
-                    console.log("write failed.");
-                }
+
+				} else {
+
+				}
             });
-        });
+		});
+		// Link presence palette
+		var palette = new presencepalette.PresencePalette(document.getElementById("network-button"), undefined);
+		var presence = null;
+		var palette = new presencepalette.PresencePalette(document.getElementById("network-button"), undefined);
+		palette.addEventListener('shared', function() {
+			palette.popDown();
+
+			presence = activity.getPresenceObject(function(error, network) {
+				if (error) {
+
+					return;
+				}
+				network.createSharedActivity('org.sugarlabs.Flashcards', function(groupId) {
+
+					isHost = true;
+				});
+				network.onDataReceived(onNetworkDataReceived);
+				network.onSharedActivityUserChanged(onNetworkUserChanged);
+			});
+		});
+		var onNetworkDataReceived = function(msg) {
+			if (presence.getUserInfo().networkId === msg.user.networkId) {
+				return;
+			}
+			switch(msg.content["action"]) {
+				case "update":
+
+				cards = msg.content["cards"];
+				document.getElementById("set-name").value = msg.content["setname"];
+				break;
+				case "init":
+				if (isHost) {
+
+					presence.sendMessage(presence.getSharedInfo().id, {
+					user: presence.getUserInfo(),
+					content: {
+						"action":"update",
+						"cards":cards,
+						"setname":setname
+					}
+				});
+			}
+				break;
+			}
+			
+			refreshCards();
+		}; 
+		var onNetworkUserChanged = function(msg) {
+				presence.sendMessage(presence.getSharedInfo().id, {
+					user: presence.getUserInfo(),
+					content: {
+						"action":"update",
+						"setname":setname,
+						"cards":cards
+					}
+				});
+		}
 	});
 	
 
