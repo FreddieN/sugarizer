@@ -11,10 +11,9 @@ define(["sugar-web/activity/activity", "sugar-web/env", "webL10n", "sugar-web/gr
 		var username = "";
 		var cards = [];
 		var setname = "";
-		var createdby = "";
+		var createdBy = "";
 		var learning = 0;
 		var face = 0;
-		var init = 1;
 		var isHost = false;
 
 		env.getEnvironment(function(err, environment) {
@@ -24,15 +23,6 @@ define(["sugar-web/activity/activity", "sugar-web/env", "webL10n", "sugar-web/gr
 		if (environment.sharedId) {
 			presence = activity.getPresenceObject(function(error, network) {
 				network.onDataReceived(onNetworkDataReceived);
-				if(init == 1) {
-					presence.sendMessage(presence.getSharedInfo().id, {
-						user: presence.getUserInfo(),
-						content: {
-							"action":"init"
-						}
-					});
-					init = 0;
-				}
 			});
 			
 		}
@@ -41,7 +31,7 @@ define(["sugar-web/activity/activity", "sugar-web/env", "webL10n", "sugar-web/gr
 		var language = environment.user ? environment.user.language : defaultLanguage;
 		webL10n.language.code = language;
 		
-		// Load from datatore
+		// Load from datastore
 		if (!currentenv.objectId) {
 			createFlashcard();
 		} else {
@@ -60,7 +50,7 @@ define(["sugar-web/activity/activity", "sugar-web/env", "webL10n", "sugar-web/gr
 		window.addEventListener("localized", function() {
 			document.getElementById("learn-button").innerHTML = (webL10n.get("LearnSet"));
 			document.getElementById("flip").innerHTML = webL10n.get("Flip");
-			createdby = webL10n.get("CreatedBy");
+			createdBy = webL10n.get("CreatedBy");
 			refreshCards();
 		});
 
@@ -77,16 +67,7 @@ define(["sugar-web/activity/activity", "sugar-web/env", "webL10n", "sugar-web/gr
 				"question": ""
 			});
 			refreshCards();
-			if (presence) {
-				presence.sendMessage(presence.getSharedInfo().id, {
-					user: presence.getUserInfo(),
-					content: {
-						"action":"update",
-						"cards":cards,
-						"setname":setname
-					}
-				});
-			}
+			pageUpdate();
 		}
 		function destroyFlashcard(n) {
 
@@ -98,22 +79,13 @@ define(["sugar-web/activity/activity", "sugar-web/env", "webL10n", "sugar-web/gr
 			};
 			cards = newcards;
 			refreshCards();
-			if (presence) {
-				presence.sendMessage(presence.getSharedInfo().id, {
-					user: presence.getUserInfo(),
-					content: {
-						"action":"update",
-						"setname":setname,
-						"cards":cards
-					}
-				});
-			}
+			pageUpdate();
 		}
 		function refreshCards() {
 			mhtml = "";
 			for (index = 0; index < cards.length; ++index) {
 
-				mhtml += '<div class="card"><div class="card-header"><span id="destroy-'+index+'" class="close">&times;</span><h2>#'+(index+1)+" "+createdby+" "+cards[index]["owner"]+'</h2></div><textarea id="question-'+index+'" placeholder="Question" class="card-content">'+cards[index]["question"]+'</textarea><textarea id="answer-'+index+'" placeholder="Answer" class="card-content">'+cards[index]["answer"]+'</textarea></div>'
+				mhtml += '<div class="card"><div class="card-header"><span id="destroy-'+index+'" class="close">&times;</span><h2>#'+(index+1)+" "+createdBy+" "+cards[index]["owner"]+'</h2></div><textarea id="question-'+index+'" placeholder="Question" class="card-content">'+cards[index]["question"]+'</textarea><textarea id="answer-'+index+'" placeholder="Answer" class="card-content">'+cards[index]["answer"]+'</textarea></div>'
 			};
 
 			document.getElementById("cards").innerHTML = mhtml;
@@ -128,45 +100,23 @@ define(["sugar-web/activity/activity", "sugar-web/env", "webL10n", "sugar-web/gr
 					e = e || window.event;
 					var target = e.target || e.srcElement;
 					cards[target.id.split("-")[1]]["answer"] = e.target.value;
-					if (presence) {
-						presence.sendMessage(presence.getSharedInfo().id, {
-							user: presence.getUserInfo(),
-							content: {
-								"action":"update",
-								"setname":setname,
-								"cards":cards
-							}
-						});
-					}
+					pageUpdate();
 				});
 				document.getElementById("question-"+index).addEventListener('blur', function (e) {
 					e = e || window.event;
 					var target = e.target || e.srcElement;
 					cards[target.id.split("-")[1]]["question"] = e.target.value;
-					if (presence) {
-						presence.sendMessage(presence.getSharedInfo().id, {
-							user: presence.getUserInfo(),
-							content: {
-								"action":"update",
-								"setname":setname,
-								"cards":cards
-							}
-						});
-					}
+					pageUpdate();
 				});
 			};
 		}
 		//Modal
-		// Get the modal
 		var modal = document.getElementById('modal-card');
 
-		// Get the button that opens the modal
 		var btn = document.getElementById("learn-button");
 
-		// Get the <span> element that closes the modal
 		var span = document.getElementsByClassName("close")[0];
 
-		// When the user clicks on the button, open the modal 
 		btn.onclick = function() {
 		learning = 0;
 		face = 0;
@@ -224,12 +174,10 @@ define(["sugar-web/activity/activity", "sugar-web/env", "webL10n", "sugar-web/gr
 		document.getElementById("prev").onclick = function() {
 			prevcard();
 		}
-		// When the user clicks on <span> (x), close the modal
 		span.onclick = function() {
 		modal.style.display = "none";
 		}
 
-		// When the user clicks anywhere outside of the modal, close it
 		window.onclick = function(event) {
 		if (event.target == modal) {
 			modal.style.display = "none";
@@ -310,7 +258,20 @@ define(["sugar-web/activity/activity", "sugar-web/env", "webL10n", "sugar-web/gr
 					}
 				});
 		}
+		var pageUpdate = function () {
+			if (presence) {
+				presence.sendMessage(presence.getSharedInfo().id, {
+					user: presence.getUserInfo(),
+					content: {
+						"action":"update",
+						"setname":setname,
+						"cards":cards
+					}
+				});
+			}
+		}
 	});
+
 	
 
 });
