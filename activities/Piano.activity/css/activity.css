@@ -84,7 +84,7 @@ ul .standard:active {
 }
 @media (max-height: 800px) {
   .number {
-    margin: 80vh auto;
+    margin: 60vh auto;
   }
 }
 .a,.g,.f,.d,.c { margin:0 0 0 -1em;  }
