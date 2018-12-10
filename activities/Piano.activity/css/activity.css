@@ -22,7 +22,7 @@ ul,li { list-style-type: none;
 li { margin:0; padding:0; list-style:none; position:relative; float:left; }
 
 ul .standard {
-  height:calc(100vh - 56px); width:calc(100vw/8); z-index:1;
+  height:calc(100vh - 56px); width:calc(100vw/8);
 	border-left:1px solid #bbb;
 	border-bottom:1px solid #bbb;
 	border-radius:0 0 5px 5px;
@@ -36,8 +36,8 @@ ul .standard:active {
 }
 
 .black {
-  margin: 0 calc(100vw/8 - 8.4vw) !important;
-	height:40vh; width:5vw; z-index:2;
+  margin: 0 4vw !important;
+	height:40vh; width:calc(100vw/16);
 	border:1px solid #000;
   border-radius:0 0 3px 3px;
   padding: 20px;
@@ -45,7 +45,7 @@ ul .standard:active {
   background:linear-gradient(45deg, #222 0%,#555 100%);
 }
 .blackkeys {
-  margin: 0 7vw;
+  margin: 0 4vw;
   position: absolute;
   top:0;
 }
@@ -86,6 +86,21 @@ ul .standard:active {
   .number {
     margin: 60vh auto;
   }
+}
+@media (orientation:landscape) {
+  .rotate-display {
+    display: none;
+  }
+}
+.rotate-display { 
+  position: fixed;
+  text-align: center;
+  font-size: 8em;
+  color: white;
+  width: 100vw;
+  height: 100vh;
+  background-color: #f85220;
+  z-index: 1;
 }
 .a,.g,.f,.d,.c { margin:0 0 0 -1em;  }
 
